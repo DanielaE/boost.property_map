@@ -30,7 +30,7 @@
 // WARNING: This code leaks memory.  For testing purposes only!
 // WARNING: This code uses library internals. For testing purposes only!
 boost::shared_ptr<boost::dynamic_property_map>
-string2string_gen(const std::string& name,
+string2string_gen(const std::string&,
                   const boost::any&,
                   const boost::any&) {
   typedef std::map<std::string,std::string> map_t;
