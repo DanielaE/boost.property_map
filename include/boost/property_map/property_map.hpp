@@ -25,6 +25,13 @@
 #include <boost/mpl/has_xxx.hpp>
 #include <boost/type_traits/is_same.hpp>
 
+#ifdef BOOST_MSVC
+# pragma warning(push)
+# pragma warning(disable: 4510) // default constructor could not be generated
+# pragma warning(disable: 4610) // struct can never be instantiated - user defined constructor required
+# pragma warning(disable: 4800) // forcing value to bool 'true' or 'false' (performance warning)
+#endif
+
 namespace boost {
 
   //=========================================================================
@@ -122,7 +129,7 @@ namespace boost {
 
   // V must be convertible to T
   template <class T, class V>
-  inline void put(T* pa, std::ptrdiff_t k, const V& val) { pa[k] = val;  }
+  inline void put(T* pa, std::ptrdiff_t k, const V& val) { pa[k] = static_cast<T>(val);  }
 
   template <class T>
   inline const T& get(const T* pa, std::ptrdiff_t k) { return pa[k]; }
@@ -303,12 +310,20 @@ namespace boost {
     Reference v = static_cast<const PropertyMap&>(pa)[k];
     return v;
   }
+  
+#ifdef BOOST_MSVC
+# pragma warning(push)
+# pragma warning(disable:4267 4244) // narrowing conversion
+#endif
   template <class PropertyMap, class Reference, class K, class V>
   inline void
   put(const put_get_helper<Reference, PropertyMap>& pa, K k, const V& v)
   {
     static_cast<const PropertyMap&>(pa)[k] = v;
   }
+#ifdef BOOST_MSVC
+# pragma warning(pop)
+#endif
 
   //=========================================================================
   // Adapter to turn a RandomAccessIterator into a property map
@@ -390,7 +405,7 @@ namespace boost {
       RandomAccessIterator first, 
       std::size_t n_ = 0, 
       const IndexMap& _id = IndexMap() ) 
-      : iter(first), n(n_), index(_id) { }
+      : iter(first), n(static_cast<property_traits<IndexMap>::value_type>(n_)), index(_id) { }
     inline safe_iterator_property_map() { }
     inline R operator[](key_type v) const {
       BOOST_ASSERT(get(index, v) < n);
@@ -599,6 +614,10 @@ namespace boost {
 #endif
 
 #include <boost/property_map/vector_property_map.hpp>
+
+#ifdef BOOST_MSVC
+# pragma warning(pop)
+#endif
 
 #endif /* BOOST_PROPERTY_MAP_HPP */
 
